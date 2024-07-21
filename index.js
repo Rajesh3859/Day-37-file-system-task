@@ -1,28 +1,46 @@
-const express = require("express");
-const bodyparser = require("body-parser");
-const fs = require("node:fs");
-const httpserver = express();
-const timestamp = new Date().toString();
+const express = require("express"); 
+const fs = ("node:fs");
+const dotenv = ("dotenv");
 
-httpserver.use(bodyparser.json());
+const app = express();
+app.use(express.json());
 
-httpserver.listen(3000, "0.0.0.0", () => {
-  console.log("server started");
-});
-httpserver.get("/", function (request, response) {
-  response.send(timestamp);
+const PORT = process.env.PORT; 
+
+ 
+app.get("/", function (request, response) {
+    response.send(`Welcome to Files. 
+    To create file :/createfile;
+    read file: /getfiles`);
 });
 
-fs.appendFile("./Files/current-date-time.txt", timestamp, (err) => {
-  if (err) throw err;
-  else {
-    console.log("File Created Successfully");
-  }
+
+app.get("/createfile", function (request, response) {
+  
+    const dateFunction = () => {
+        const timeStamp = new Date().toString();
+        fs.writeFile(`./Files/current-date-time.txt`, timeStamp, (err) => {
+            if (err) throw err;
+            else {
+                console.log("File Created Successfully")
+            }
+        })
+    }
+    response.send(dateFunction());
+})
+
+
+app.get("/getfiles", function (request, response) {
+    fs.readdir("./Files/", (err, files) => {
+        if (files.length === 0) {
+            response.send("Oops! It looks like this folder is empty.")
+        }
+        else {
+            const myJSON = JSON.stringify(files);
+            response.send(myJSON);
+        }
+    })
 });
-function readAllFilesFromDir() {
-  fs.readdir("./files", (err, files) => {
-    if (err) console.log(err);
-    if (files) console.log(files);
-  });
-}
-readAllFilesFromDir();
+
+
+app.listen(PORT, () => console.log(`The server started in: ${PORT}`));
